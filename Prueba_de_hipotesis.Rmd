@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Notebook de inferencias sobre el vector de medias
+
+
+
+```{r}
+  n <- 3
+  p <- 2
+  X <- matrix(c(6,9,10,6,8,3), nrow = 3, byrow = T)
+  X
+```
+
+Queremos contrastar la hipótesis 
+\[
+H_0:\boldsymbol{\mu}=[9,5]^t
+\]
+
+Calculamos la estadística de prueba, necesitamos el vector de medias y la matriz de varianzas y covarianzas
+```{r}
+  xbar <- colMeans(X)
+  xbar
+  S <- cov(X)
+  S
+  mu0 <- c(9,5)
+  
+  Tcuad <- n*(xbar-mu0)%*%solve(S)%*%(xbar-mu0)
+  Tcuad
+  
+```
+
+Ahora calculamos el cuantil de la distribución que deja un area de $alpha$ hacia la derecha
+
+
+
