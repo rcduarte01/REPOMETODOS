@@ -32,7 +32,36 @@ Calculamos la estadística de prueba, necesitamos el vector de medias y la matri
   
 ```
 
-Ahora calculamos el cuantil de la distribución que deja un area de $alpha$ hacia la derecha
+Ahora calculamos el cuantil de la distribución que deja un area de $\alpha=0.05$ hacia la derecha
+
+
+```{r}
+(n-1)*p/(n-p)*qf(0.05, p, n-p, lower.tail = F)
+```
+
+
+Regla de decisión: rechazar $H_0$ si $T^2>\dfrac{(n-1)p}{n-p}F_{p,n-p}(\alpha)$.
+
+Como el $T^2=0.78<\dfrac{(n-1)p}{n-p}F_{p,n-p}(\alpha)$, entonces concluimos que no podemos rechazar $H_0$, por lo tanto, no hay evidencia suficiente para concluir que $\boldsymbol{\mu}\neq[9,5]^t$
+
+Construyamos un intervalo de confianza para el parámetro $\boldsymbol{\mu}$
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+X_dataframe <- as.data.frame(X)
+ggplot(X_dataframe, aes(V1, V2)) +
+  stat_conf_ellipse()+
+  geom_point(aes(x=8,y=6),colour="red")
+```
+
+
+
+
+
+
+
+
 
 
 
