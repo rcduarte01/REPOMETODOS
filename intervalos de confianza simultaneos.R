@@ -2,6 +2,7 @@ library(ggplot2)
 library(ggpubr)
 library(gridExtra)
 library(ggforce)
+library(ellipse)
 
 
 # El archivo college.csv contiene las puntuaciones de el examen de admisión a una universidad de
@@ -23,26 +24,34 @@ p <- 3
 
 # primero vamos a contruir las ellipses de confianza tomando las variables dos a dos
 
-elipse1 <- ggplot(college, aes(Ciencias.sociales.e.historia, Verbal))+
-  stat_conf_ellipse() + theme_minimal()
-
-elipse2 <- ggplot(college, aes(Ciencias.sociales.e.historia, Ciencia))+
-  stat_conf_ellipse() + theme_minimal()
-  
-elipse3 <- ggplot(college, aes(Verbal, Ciencia))+
-  stat_conf_ellipse() + theme_minimal()
-
-grid.arrange(elipse2,elipse3,elipse1, ncol=2)
-
-# tomemos las puntuaciones de ciencia y verbal y construyamos el IC 
-# de forma simultanea para ambas medias (µ2 y µ3)
-
-
 # calculemos las estadísticas descriptivas de la muestra
 xbar <- colMeans(college)
 xbar
 S <- cov(college)
 S
+
+
+c <- sqrt((p*(n-1)/(n-p))*qf(0.05,p,n-p, lower.tail = F))
+
+#elipse para ciencias sociales e Historia y verbal
+
+plot(ellipse::ellipse(S[1:2,1:2],centre=c(xbar[1],xbar[2]),t=c/sqrt(n)),
+     type="l",xlab="Ciencias sociales e Historia ",ylab="Prueba Verbal")
+
+#elipse para ciencias sociales e Historia y Ciencia
+
+plot(ellipse::ellipse(S[1:3,1:3],centre=c(xbar[1],xbar[3]),t=c/sqrt(n)),
+     type="l",xlab="Ciencias sociales e Historia ",ylab="Prueba Ciencias")
+
+#elipse para prueba verbal y Ciencia
+
+plot(ellipse::ellipse(S[2:3,2:3],centre=c(xbar[2],xbar[3]),t=c/sqrt(n)),
+     type="l",xlab="Prueba Verbal ",ylab="Prueba Ciencias")
+
+
+# tomemos las puntuaciones de ciencia y verbal y construyamos el IC 
+# de forma simultanea para ambas medias (µ2 y µ3)
+
 
 # El IC t-student
 # para Ciencias (µ3)
@@ -62,12 +71,14 @@ LS_V <- as.numeric(xbar[2]+t*sqrt(S[2,2]/n))
 cat(LI_V,LS_V)
 
 
-grafico1 <- ggplot(college, aes(Verbal, Ciencia))+
-  stat_conf_ellipse() + theme_minimal() +
-  geom_hline(yintercept=c(LI_C,LS_C), col="red") +
-  geom_vline(xintercept =c(LI_V, LS_V), col="red")
+plot(ellipse::ellipse(S[2:3,2:3],centre=c(xbar[2],xbar[3]),t=c/sqrt(n)),
+     type="l",xlab="Prueba Verbal ",ylab="Prueba Ciencias")
 
-grafico1
+abline(v=c(LI_V,LS_V), col="red")
+abline(h=c(LI_C,LS_C), col="red")
+
+  
+
 # Ahora construyamos los Intervalos de confianza T^2
 
 # para Ciencias (µ3)
@@ -79,26 +90,72 @@ LI_C_T <- as.numeric(xbar[3] - sqrt(T2)*sqrt(S[3,3]/n))
 LS_C_T <- as.numeric(xbar[3] + sqrt(T2)*sqrt(S[3,3]/n))
 cat(LI_C_T,LS_C_T)
 
-grafico1+
-  geom_hline(yintercept=c(LI_C_T,LS_C_T), col="blue") 
-
-
 # para Verbal (µ2)
 
 LI_V_T <- as.numeric(xbar[2] - sqrt(T2)*sqrt(S[2,2]/n))
 LS_V_T <- as.numeric(xbar[2] + sqrt(T2)*sqrt(S[2,2]/n))
 
-grafico1+
-  geom_hline(yintercept = c(LI_C_T,LS_C_T), col="blue") +
-  geom_vline(xintercept = c(LI_V_T,LS_V_T), col="blue")
-
 # Ellipse a mano
-c=sqrt((p*(n-1)/(n-p))*qf(0.05,p,n-p, lower.tail = F))
 
 plot(ellipse::ellipse(S[2:3,2:3],centre=c(xbar[2],xbar[3]),t=c/sqrt(n)),
-     type="l",xlab="Verabal",ylab="Ciencia")
-abline(h=c(LI_C_T,LS_C_T), col="red")
-abline(v=c(LI_V_T,LS_V_T), col="red")
+     type="l",xlab="Prueba Verbal ",ylab="Prueba Ciencias")
+
+abline(v=c(LI_V,LS_V), col="red")
+abline(h=c(LI_C,LS_C), col="red")
+
+abline(v=c(LI_V_T,LS_V_T ), col="blue")
+abline(h=c(LI_C_T,LS_C_T), col="blue")
+
+
+# ahora construyamos los intervalos de confianza usando Bonferroni
+
+# para Ciencias (µ3)
+
+alpha_B <- alpha/p
+alpha_B
+
+
+t_B <- qt(alpha_B/2, df=n-1, lower.tail = F)
+
+LI_C_B <- as.numeric(xbar[3]-t_B *sqrt(S[3,3]/n))
+LS_C_B <- as.numeric(xbar[3]+t_B *sqrt(S[3,3]/n))
+cat(LI_C_B,LS_C_B)
+
+# Para verbal
+
+LI_V_B <- as.numeric(xbar[2] - t_B*sqrt(S[2,2]/n))
+LS_V_B <- as.numeric(xbar[2]+t_B*sqrt(S[2,2]/n))
+
+cat(LI_V_B,LS_V_B)
+
+plot(ellipse::ellipse(S[2:3,2:3],centre=c(xbar[2],xbar[3]),t=c/sqrt(n)),
+     type="l",xlab="Prueba Verbal ",ylab="Prueba Ciencias")
+
+abline(v=c(LI_V,LS_V), col="red")
+abline(h=c(LI_C,LS_C), col="red")
+
+abline(v=c(LI_V_T,LS_V_T ), col="blue")
+abline(h=c(LI_C_T,LS_C_T), col="blue")
+
+abline(v=c(LI_V_B,LS_V_B), col="darkgreen")
+abline(h=c(LI_C_B,LS_C_B), col="darkgreen")
+
+
+
+## Intervalo de confianza para la diferencia de medias poblacionales de
+# las puntuaciones de ciencia y verbal (µ2-µ3)
+
+alpha <- 0.05
+T2 <- p*(n-1)/(n-p)*qf(alpha, p, n-p, lower.tail = F) # Cuantil de la distribución T^2 de Hotelling
+
+LI_DIFF <- as.numeric((xbar[2]-xbar[3])-sqrt(T2)*sqrt((S[2,2]-2*S[2,3]+S[3,3])/n))
+LS_DIFF <- as.numeric((xbar[2]-xbar[3])+sqrt(T2)*sqrt((S[2,2]-2*S[2,3]+S[3,3])/n))
+
+c(LI_DIFF,LS_DIFF )
+
+
+
+
 
 
 
