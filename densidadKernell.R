@@ -86,6 +86,7 @@ estimacion_densidad_gaussiano_10 <- density(bufalo, kernel = "gaussian", bw=10)
 estimacion_densidad_epanechnikov_10 <- density(bufalo, kernel = "epanechnikov", bw=10)
 estimacion_densidad_biweight_10 <- density(bufalo, kernel = "biweight", bw=10)
 
+
 hist(bufalo, freq = F, ylim = c(0, 0.025))
 lines(estimacion_densidad_triangular_10, col="red")
 lines(estimacion_densidad_gaussiano_10, col="blue")
