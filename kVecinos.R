@@ -47,20 +47,48 @@ plot(datos$pata, datos$organo_sexual, col=datos$especie, pch=19)
 # segun el color: Rosa: tipo b, Negro: tipo a
 
 distancia <- function(x,x0){
-  sqrt(sum((x-x0)^2))
+  #x: arreglo cuyas filas son los puntos
+  #x0: es la nueva observación a la cual queremos calcular su distancia
+  sqrt((x[,1]-x0[1])^2 + ((x[,2]-x0[2])^2))
+  
 }
 
 
+distancia(x= datos[,c(3:4,1)], x0=c(124,49))
+sort(distancia(x= datos[,c(3:4,1)], x0=c(124,49)))
+o <- order(distancia(x= datos[,c(3:4,1)], x0=c(124,49)))
+order(sort(distancia(x= datos[,c(3:4,1)], x0=c(124,49))))
 
-distancia(x=rbind(c(1,2), c(2,5)), x0=c(3,6))
+datos[o,]
 
-
-k_vecinos <- function(k, x0){
+k_vecinos <- function(k, x0, data){
   #k: Cuantos vecinos considerar
   # x0: nueva observación que queremos clasificar
-  
-  
+  # data: contiene la matriz de los datos, mas la columna de la categoria al final.
+  d <- distancia(data, x0)
+  o <- order(d)
+  tt <- table(data[o[1:k],k])
+  print(tt)
+  if(tt[1] < tt[2]){
+    return(names(tt)[2])
+  }else{
+    return(names(tt)[1])
+  }
 }
+
+k_vecinos(k=3, x0=c(110,54),data=datos[,c(3:4,1)])
+
+# ahora quitemos un punto y hagamos la predicción con los puntos restantes
+
+
+vector_prediccion <- c()
+for(i in 1:20){
+  vector_prediccion[i] <- k_vecinos(k=5, x0=as.numeric(datos[i,c(3:4)]) ,data=datos[-i,c(3:4,1)])
+}
+
+table(datos$especie, datos$vector_prediccion)
+
+
 
 
 
