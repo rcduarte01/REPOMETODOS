@@ -67,7 +67,7 @@ k_vecinos <- function(k, x0, data){
   # data: contiene la matriz de los datos, mas la columna de la categoria al final.
   d <- distancia(data, x0)
   o <- order(d)
-  tt <- table(data[o[1:k],k])
+  tt <- table(data[o[1:k],3])
   print(tt)
   if(tt[1] < tt[2]){
     return(names(tt)[2])
@@ -76,17 +76,19 @@ k_vecinos <- function(k, x0, data){
   }
 }
 
-k_vecinos(k=3, x0=c(110,54),data=datos[,c(3:4,1)])
+k_vecinos(k=5, x0=c(110,54),data=datos[,c(3:4,1)])
 
 # ahora quitemos un punto y hagamos la predicción con los puntos restantes
 
 
 vector_prediccion <- c()
 for(i in 1:20){
-  vector_prediccion[i] <- k_vecinos(k=5, x0=as.numeric(datos[i,c(3:4)]) ,data=datos[-i,c(3:4,1)])
+  vector_prediccion[i] <- k_vecinos(k=5,x0=as.numeric(datos[i,c(3:4)]),data=datos[-i,c(3:4,1)])
 }
 
-table(datos$especie, datos$vector_prediccion)
+table(datos$especie,vector_prediccion)
+
+
 
 
 
